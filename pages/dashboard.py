@@ -10,7 +10,7 @@ app.add_static_files('/assets', 'static')
 # ----- PAGE PRINCIPALE -----
 @ui.page('/dashboard')
 def dashboard_page():
-    ui.page_title('PowerMind - Dashboard')
+    ui.page_title('SUIVI4K - Dashboard')
     create_dashboard_layout('Dashboard')
 
 
@@ -20,9 +20,9 @@ def dashboard_home():
     create_dashboard_layout(' Accueil')
 
 
-@ui.page('/dashboard/consommation')
-def dashboard_consommation():
-    create_dashboard_layout(' Consommation')
+@ui.page('/dashboard/profil')
+def dashboard_profil():
+    create_dashboard_layout(' Modifier profil')
 
 
 @ui.page('/dashboard/heure')

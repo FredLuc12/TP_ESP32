@@ -1,25 +1,21 @@
 from nicegui import ui
 from components.sidebar import render_sidebar
 
-# ----- LAYOUT COMMUN -----
 def create_dashboard_layout(title: str):
-    """Layout dashboard avec sidebar + contenu principal."""
-    # 1. Sidebar (drawer)
+    """Layout COMPLET : sidebar + contenu principal."""
+    # 1. CRÉER drawer (GLOBAL)
     drawer = ui.left_drawer().classes('bg-white shadow-xl w-72')
-    # 2. Bouton hamburger (fixe en haut à gauche)
+    # 2. Bouton hamburger (GLOBAL, fixe en haut)
     ui.button(
         '☰',
         on_click=lambda: drawer.toggle()
-    ).classes(
-        'fixed top-4 left-4 z-50 bg-white shadow-lg rounded-full w-12 h-12 text-xl'
-    )
-    # 3. Contenu de la sidebar
+    ).classes('fixed top-4 left-4 z-50 bg-white shadow-lg rounded-full w-12 h-12 text-xl')
+    # 3. CONTENU drawer
     with drawer:
         with ui.column().classes('p-6 gap-6 h-full'):
-            render_sidebar(drawer)  # ← Composant réutilisable
-
-    # 4. Contenu principal (à droite)
-    with ui.column().classes('p-6 pt-20 gap-8'):  # pt-20 = décalage pour hamburger
+            render_sidebar(drawer)  # ← CORRECT : 1 seul argument
+    # 4. Contenu principal
+    with ui.column().classes('p-6 pt-20 gap-8'):
         ui.label(title).classes('text-3xl font-bold text-gray-900')
         ui.label('Contenu de cette section...').classes('text-gray-500 text-lg')
 
