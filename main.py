@@ -1,5 +1,7 @@
 from nicegui import ui, app
+from models import create_tables
 
+create_tables()
 # Assets statiques
 app.add_static_files('/assets', 'static')  # ← Garde /assets comme tu l'utilises
 
