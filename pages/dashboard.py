@@ -47,14 +47,12 @@ def base_content():
             ui.label('24.5°C').classes('text-5xl font-black text-green-600 text-center')
             ui.label('Seuil: 28°C max').classes('text-xl text-gray-500 text-center')
             ui.label('✅ OK').classes('text-2xl font-bold text-green-700 text-center mt-2')
-        
         # HUMIDITÉ
         with ui.card().classes('flex-1 p-8 shadow-xl rounded-3xl border-4 border-blue-200'):
             ui.icon('humidity').classes('text-6xl text-blue-500 mx-auto mb-4')
             ui.label('68%').classes('text-5xl font-black text-blue-600 text-center')
             ui.label('Seuil: 75% max').classes('text-xl text-gray-500 text-center')
             ui.label('✅ OK').classes('text-2xl font-bold text-blue-700 text-center mt-2')
-        
         # MOUVEMENT
         with ui.card().classes('flex-1 p-8 shadow-xl rounded-3xl border-4 border-orange-200'):
             ui.icon('motion_sensor_active').classes('text-6xl text-orange-500 mx-auto mb-4')

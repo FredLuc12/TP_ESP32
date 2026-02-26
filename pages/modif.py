@@ -15,7 +15,7 @@ def modif_content():
                 # Sélecteurs
                 ui.date('Nouvelle date').classes('w-full').props('outlined')
                 ui.time('Nouvelle heure').classes('w-full').props('outlined')
-                ui.button('🔄 Synchroniser', color='blue').classes('w-full text-xl py-4 rounded-2xl shadow-xl')
+                ui.button(' Synchroniser', color='blue').classes('w-full text-xl py-4 rounded-2xl shadow-xl')
 
 @ui.page('/dashboard/modif')
 def modif_page():

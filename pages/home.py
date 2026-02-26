@@ -5,7 +5,6 @@ def home_content():
     """Contenu page Home."""
     with ui.column().classes('gap-8 w-full'):
         ui.label('Bienvenue dans votre dashboard SUIVI4K !').classes('text-3xl text-gray-700 font-light')
-        
         # Cards rapides
         with ui.row().classes('gap-6 w-full'):
             with ui.card().classes('flex-1 p-8 shadow-xl rounded-3xl'):
