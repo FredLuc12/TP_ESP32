@@ -1,11 +1,11 @@
 from nicegui import ui
+
 from components.layout import create_dashboard_layout
 
 def base_content():
     """Contenu page Valeurs de base + Alertes."""
     with ui.column().classes('gap-8 w-full'):
         ui.label(' VALEURS DE BASE & ALERTES').classes('text-3xl text-gray-700')
-        
         # 3 CAPTEURS avec seuils + alertes
         with ui.row().classes('gap-8 w-full'):
             # TEMPÉRATURE & HUMIDITÉ
@@ -21,7 +21,6 @@ def base_content():
                 ui.label('ACTIF').classes('text-5xl font-black text-orange-600 mb-2')
                 ui.label("Dernière détection : 11:42").classes('text-xl text-gray-500')
                 ui.label(' Surveillance active').classes('text-lg font-semibold text-orange-700 mt-4')
-        
         # HISTORIQUE ALERTES
         with ui.card().classes('p-8 shadow-2xl rounded-3xl w-full'):
             ui.label(' ALERTES RECENTES').classes('text-2xl font-bold text-red-800 mb-6')
@@ -35,7 +34,6 @@ def base_content():
             ]).classes('w-full').props('dense'):
                 pass
             ui.button('Envoyer test alerte', color='red').classes('mt-4 text-xl py-3 px-8 rounded-xl shadow-xl')
-
-@ui.page('/dashboard/base')
-def base_page():
-    create_dashboard_layout(' Valeurs de Base', base_content)
+@ui.page('/base')
+def dashboard_base():
+    create_dashboard_layout('Valeurs', base_content)

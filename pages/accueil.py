@@ -50,7 +50,7 @@ def accueil_page():
                 color=RED,
                 on_click=lambda: ui.navigate.to('/connexion')
             ).classes('flex-1 text-2xl py-8 px-12 font-bold shadow-2xl hover:shadow-3xl rounded-3xl h-20')
-        
+
         # Lien création compte
         ui.link(' Créer un compte', target='/connexion').classes('text-xl font-semibold hover:underline mt-8').style(f'color: {GRAY}')
 

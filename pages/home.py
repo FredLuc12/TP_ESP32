@@ -15,7 +15,6 @@ def home_content():
                 ui.icon('notifications', color='orange').classes('text-5xl mx-auto mb-4')
                 ui.label('Alertes').classes('text-3xl font-bold text-center text-orange-600')
                 ui.label('0 actif').classes('text-xl text-center text-orange-800')
-
-@ui.page('/dashboard/home')
-def home_page():
-    create_dashboard_layout(' Dashboard Home', home_content)
+@ui.page('/home')
+def dashboard_home():
+    create_dashboard_layout(' Home', home_content)

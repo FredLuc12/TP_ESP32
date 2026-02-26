@@ -13,7 +13,6 @@ def profil_content():
                 ui.input('Nouveau mot de passe').classes('w-full text-xl').props('outlined password')
                 ui.input('Confirmer mot de passe').classes('w-full text-xl').props('outlined password')
                 ui.button('Sauvegarder', color='green').classes('w-full text-xl py-4 rounded-2xl shadow-xl')
-
-@ui.page('/dashboard/profil')
-def profil_page():
-    create_dashboard_layout('Modifier Profil', profil_content)
+@ui.page('/profil')
+def dashboard_profil():
+    create_dashboard_layout(' Modifier Profil', profil_content)
