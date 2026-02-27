@@ -5,12 +5,12 @@
 #include <WiFiClient.h>
 
 // WiFi
-#define WIFI_SSID "Ansumdine"
-#define WIFI_PASSWORD "1234567890"
+#define WIFI_SSID "XXXXXX"
+#define WIFI_PASSWORD "XXXXX"
 
 // Serveur Arduino
 
-#define SERVER_IP "10.130.13.100"  // IP statique du superviseur
+#define SERVER_IP "10.130.13.100"  
 String getServerUrl() {
   return "http://" + String(SERVER_IP) + ":80/";
 }
@@ -66,10 +66,10 @@ void loop() {
   Serial.print("JSON        : "); Serial.println(json);
   Serial.println("--------------------------------------");
 
-  // Test de connectivité avant envoi
+ 
 if (WiFi.status() == WL_CONNECTED) {
   Serial.print("Test ping superviseur : ");
-  Serial.println(WiFi.localIP());  // Vérifiez que c'est la bonne IP
+  Serial.println(WiFi.localIP());  
 } else {
   Serial.println("❌ WiFi déconnecté !");
   return;

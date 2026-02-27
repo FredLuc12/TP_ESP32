@@ -1,10 +1,10 @@
 #include <WiFiS3.h>
 #include <ArduinoJson.h>
-#include <ctype.h>  // ← AJOUT CRITIQUE !
+#include <ctype.h>  
 
 // WiFi
-char ssid[] = "Ansumdine";
-char pass[] = "1234567890";
+char ssid[] = "xxxxxxxxx";
+char pass[] = "xxxxxxxxxxxx";
 
 // Serveur
 WiFiServer server(80);
@@ -35,17 +35,17 @@ void setup() {
     attempts++;
   }
   
-  Serial.println("\n✅ WiFi connecté");
+  Serial.println("\n WiFi connecté");
   Serial.print("IP: "); Serial.println(WiFi.localIP());
   server.begin();
-  Serial.println("Serveur HTTP 80 ✅");
+  Serial.println("Serveur HTTP 80 ");
 }
 
 void loop() {
   WiFiClient client = server.available();
   
   if (client) {
-    Serial.println("\n--- ⚡ NOUVELLE CONNEXION DETECTEE ---");
+    Serial.println("\n---  NOUVELLE CONNEXION DETECTEE ---");
     String currentLine = "";
     String requestLine = ""; 
     int contentLength = 0;
@@ -59,7 +59,7 @@ void loop() {
         if (requestLine == "") requestLine = currentLine; 
         
         if (c == '\n') {
-          if (currentLine.length() == 0) break; // Fin des headers
+          if (currentLine.length() == 0) break; 
           
           if (currentLine.startsWith("POST")) isPost = true;
           
@@ -88,7 +88,7 @@ void loop() {
         }
       }
       
-      Serial.print("📥 BODY RECU : "); Serial.println(body); 
+      Serial.print(" BODY RECU : "); Serial.println(body); 
 
       StaticJsonDocument<512> doc;
       DeserializationError error = deserializeJson(doc, body);
@@ -104,11 +104,11 @@ void loop() {
           hum_s2 = doc["humidity"]; 
           pir_s2 = doc["pir"];
         }
-        Serial.print("✅ Donnees enregistrees pour : "); Serial.println(room);
+        Serial.print(" Donnees enregistrees pour : "); Serial.println(room);
         
         
       } else {
-        Serial.print("❌ Erreur JSON : "); Serial.println(error.c_str());
+        Serial.print(" Erreur JSON : "); Serial.println(error.c_str());
       }
       
       // Reponse HTTP courte pour l'ESP
@@ -117,7 +117,7 @@ void loop() {
     
     // 3. CAS DU GET (Interface du collegue ou navigateur)
     else {
-      Serial.println("🌐 Envoi des donnees JSON au Front-end...");
+      Serial.println(" Envoi des donnees JSON au Front-end...");
       client.println("HTTP/1.1 200 OK");
       client.println("Content-Type: application/json");
       client.println("Access-Control-Allow-Origin: *"); 
@@ -136,6 +136,6 @@ void loop() {
     
     delay(10);
     client.stop();
-    Serial.println("--- 🏁 FIN DE TRANSACTION ---\n");
+    Serial.println("--- FIN DE TRANSACTION ---\n");
   }
 }
