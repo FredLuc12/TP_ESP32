@@ -16,7 +16,7 @@ def insert_alerte(sensor_id, type_alerte, valeur, seuil, message):
         conn.commit()
         conn.close()
     except:
-        pass  # Silencieux
+        pass
 
 def base_content():
     """Dashboard capteurs multi-salles + alertes."""
@@ -43,12 +43,13 @@ def base_content():
                     SELECT salle, MAX(created_at) as max_date
                     FROM sensor_data GROUP BY salle
                 ) s2 ON s1.salle = s2.salle AND s1.created_at = s2.max_date
-                ORDER BY s1.salle
+                ORDER BY created_at DESC
+                LIMIT 3
             """)
             dernieres_donnees = cursor.fetchall()
             
             # 5 dernières alertes
-            cursor.execute("SELECT type_alerte, message, created_at, resolved FROM alerts ORDER BY created_at DESC LIMIT 5")
+            cursor.execute("SELECT type_alerte, message, created_at, resolved FROM alerts ORDER BY created_at DESC LIMIT 10")
             alertes_raw = cursor.fetchall()
             alertes = [dict(row) for row in alertes_raw]
             
