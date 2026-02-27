@@ -22,7 +22,7 @@ Chaque nœud est basé sur un ESP8266 NodeMCU connecté au WiFi "Ansumdine".
 
 * **Matériel :** DHT11 (Temp/Hum) sur D4/GPIO2, PIR sur D5/GPIO14
 * **Fonctionnement :** Envoi des données toutes les 5 secondes au superviseur
-* **Format de donnée :** JSON[cite: 56].
+* **Format de donnée :** JSON
 
 ```json
 {
