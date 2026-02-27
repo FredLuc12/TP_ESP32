@@ -4,25 +4,25 @@ Ce projet réalise la supervision automatisée d'un bâtiment connecté. Il cent
 
 ##  Architecture du Système
 
-[cite_start]Le système repose sur une architecture **Hub-and-Spoke** (en étoile)[cite: 48].
+Le système repose sur une architecture **Hub-and-Spoke** (en étoile).
 
 
 
 ### Composantes
-* [cite_start]**Nœuds Capteurs (Parcours A - ESP8266) :** Acquièrent les données et les envoient par HTTP POST (JSON)[cite: 49].
-* [cite_start]**Superviseur Central (Parcours B - Arduino Uno R4 WiFi) :** Centralise les données, héberge l'API JSON et gère les seuils d'alerte[cite: 50].
-* [cite_start]**Interface de Supervision (Front-end NiceGUI) :** Tableau de bord web pour la visualisation des données en temps réel[cite: 51].
-* [cite_start]**Système de Notification (Make.com) :** Service cloud déclenchant des e-mails d'alerte[cite: 52].
+* **Nœuds Capteurs (Parcours A - ESP8266) :** Acquièrent les données et les envoient par HTTP POST (JSON)
+* **Superviseur Central (Parcours B - Arduino Uno R4 WiFi) :** Centralise les données, héberge l'API JSON et gère les seuils d'alerte
+* **Interface de Supervision (Front-end NiceGUI) :** Tableau de bord web pour la visualisation des données en temps réel
+* **Système de Notification (Make.com) :** Service cloud déclenchant des e-mails d'alerte
 
 
 
 ##  Nœuds Capteurs (Parcours A - ESP8266)
 
-[cite_start]Chaque nœud est basé sur un ESP8266 NodeMCU connecté au WiFi "Ansumdine"[cite: 54, 100].
+Chaque nœud est basé sur un ESP8266 NodeMCU connecté au WiFi "Ansumdine".
 
-* [cite_start]**Matériel :** DHT11 (Temp/Hum) sur D4/GPIO2, PIR sur D5/GPIO14[cite: 11, 12, 55].
-* [cite_start]**Fonctionnement :** Envoi des données toutes les 5 secondes au superviseur[cite: 54].
-* [cite_start]**Format de donnée :** JSON[cite: 56].
+* **Matériel :** DHT11 (Temp/Hum) sur D4/GPIO2, PIR sur D5/GPIO14
+* **Fonctionnement :** Envoi des données toutes les 5 secondes au superviseur
+* **Format de donnée :** JSON[cite: 56].
 
 ```json
 {
