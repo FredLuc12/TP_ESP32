@@ -4,122 +4,139 @@ from pages.connexion import user_session
 from components.layout import create_dashboard_layout
 from webhook import send_make_webhook
 
-def base_content():
-    """Contenu page Valeurs de base + Alertes depuis BDD."""
-    with ui.column().classes('gap-6 w-full'):
+def insert_alerte(sensor_id, type_alerte, valeur, seuil, message):
+    """Insère alerte BDD UNIQUEMENT (pas webhook)."""
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO alerts (sensor_data_id, type_alerte, message, sent)
+            VALUES (?, ?, ?, 1)
+        """, (sensor_id, type_alerte, message))
+        conn.commit()
+        conn.close()
+    except:
+        pass  # Silencieux
 
-        # Seuils utilisateur (BDD)
+def base_content():
+    """Dashboard capteurs multi-salles + alertes."""
+    with ui.column().classes('gap-6 w-full'):
         if not user_session['user_id']:
-            ui.label('Connectez-vous pour voir vos données').classes('text-xl text-red-600 text-center p-6')
+            ui.label('Connectez-vous pour voir vos données').classes(
+                'text-xl text-red-600 text-center p-6')
             return
         
         try:
             conn = get_connection()
             cursor = conn.cursor()
             
-            # Seuils utilisateur (table thresholds)
+            # Seuils
             cursor.execute("SELECT temp_max, humidite_max, mouvement_actif FROM thresholds WHERE id=1")
             seuils = cursor.fetchone()
+            temp_max, humid_max, mouvement_actif = seuils or (28.0, 75.0, 1)
             
-            # Dernières données capteurs
+            # Dernières par salle
             cursor.execute("""
-                SELECT temperature, humidite, mouvement, created_at 
-                FROM sensor_data 
-                ORDER BY created_at DESC 
-                LIMIT 1
+                SELECT s1.*
+                FROM sensor_data s1
+                INNER JOIN (
+                    SELECT salle, MAX(created_at) as max_date
+                    FROM sensor_data GROUP BY salle
+                ) s2 ON s1.salle = s2.salle AND s1.created_at = s2.max_date
+                ORDER BY s1.salle
             """)
-            dernier_capteur = cursor.fetchone()
-
-            # Alertes récentes utilisateur
-            cursor.execute("""
-                SELECT a.type_alerte, a.message, a.created_at, a.resolved
-                FROM alerts a
-                ORDER BY a.created_at DESC
-                LIMIT 5
-            """)
+            dernieres_donnees = cursor.fetchall()
+            
+            # 5 dernières alertes
+            cursor.execute("SELECT type_alerte, message, created_at, resolved FROM alerts ORDER BY created_at DESC LIMIT 5")
             alertes_raw = cursor.fetchall()
             alertes = [dict(row) for row in alertes_raw]
+            
             conn.close()
-        except:
-            seuils = (28.0, 75.0, 1)
-            dernier_capteur = (24.5, 68.0, 1, '26-02-27 10:15')
+            
+        except Exception as e:
+            print("Erreur base_content:", e)
+            temp_max, humid_max, mouvement_actif = (28.0, 75.0, 1)
+            dernieres_donnees = []
             alertes = []
         
-        temp_max, humid_max, mouvement_actif = seuils or (28.0, 75.0, 1)
-        temp, humid, mouvement, timestamp = dernier_capteur or (24.5, 68.0, 1, 'Maintenant')
+        # CAPTEURS PAR SALLE
+        if not dernieres_donnees:
+            ui.label("Aucune donnée capteur").classes("text-gray-500 text-center p-6 italic")
+        else:
+            for row in dernieres_donnees:
+                salle = row["salle"]
+                temp = row["temperature"]
+                humid = row["humidite"]
+                mouvement = row["mouvement"]
+                timestamp = row["created_at"]
+                sensor_id = row["id"]
+                
+                with ui.card().classes("p-6 shadow-xl rounded-2xl w-full border-2 border-gray-100"):
+                    ui.label(f"SALLE : {salle.upper()}").classes("text-lg font-bold text-gray-700 mb-4")
+                    
+                    with ui.row().classes("gap-6 w-full"):
+                        # TEMPÉRATURE
+                        with ui.card().classes("flex-1 p-4 shadow rounded-xl border border-green-200"):
+                            ui.label("TEMPÉRATURE").classes("text-sm font-bold text-green-700")
+                            ui.label(f"{temp:.1f}°C").classes("text-2xl font-black text-green-600")
+                            ui.label(f"Seuil: {temp_max}°C").classes("text-xs text-gray-500")
+                            status = "OK" if temp <= temp_max else "ALERTE"
+                            color = "text-green-700" if temp <= temp_max else "text-red-700"
+                            ui.label(status).classes(f"text-sm font-semibold {color}")
+                            
+                            #ALERTE SEULEMENT BDD (pas webhook)
+                            if temp > temp_max:
+                                insert_alerte(sensor_id, "temperature", temp, temp_max, f"{salle}: {temp}°C > {temp_max}°C")
+                        
+                        # HUMIDITÉ
+                        with ui.card().classes("flex-1 p-4 shadow rounded-xl border border-blue-200"):
+                            ui.label("HUMIDITÉ").classes("text-sm font-bold text-blue-700")
+                            ui.label(f"{humid:.0f}%").classes("text-2xl font-black text-blue-600")
+                            ui.label(f"Seuil: {humid_max}%").classes("text-xs text-gray-500")
+                            status = "OK" if humid <= humid_max else "ALERTE"
+                            color = "text-blue-700" if humid <= humid_max else "text-red-700"
+                            ui.label(status).classes(f"text-sm font-semibold {color}")
+                            
+                            #ALERTE SEULEMENT BDD (pas webhook)
+                            if humid > humid_max:
+                                insert_alerte(sensor_id, "humidite", humid, humid_max, f"{salle}: {humid}% > {humid_max}%")
+                        
+                        # MOUVEMENT
+                        with ui.card().classes("flex-1 p-4 shadow rounded-xl border border-orange-200"):
+                            ui.label("MOUVEMENT").classes("text-sm font-bold text-orange-700")
+                            status_mvt = "ACTIF" if mouvement else "INACTIF"
+                            ui.label(status_mvt).classes("text-2xl font-black text-orange-600")
+                            ui.label(f"Dernière: {timestamp[:16]}").classes("text-xs text-gray-500")
+                            if mouvement_actif:
+                                ui.label("Surveillance active").classes("text-sm font-semibold text-orange-700")
         
-        
-        def check_and_send_alert(temp, humid, temp_max, humid_max):
-            """Vérifie seuils et envoie webhook si dépassé."""
-            en_alerte = False
-            
-            if temp > temp_max:
-                send_make_webhook("temperature", temp, temp_max, f"Température dépasse {temp_max}°C")
-                en_alerte = True
-            
-            if humid > humid_max:
-                send_make_webhook("humidite", humid, humid_max, f"Humidité dépasse {humid_max}%")
-                en_alerte = True
-
-            return en_alerte
-
-        if check_and_send_alert(temp, humid, temp_max, humid_max):
-                ui.notify("Nouvelle alerte envoyée !", color='negative', position='top')
-        # 3 CAPTEURS (taille RÉDUITE)
-        with ui.row().classes('gap-6 w-full'):
-            # TEMPÉRATURE
-            with ui.card().classes('flex-1 p-6 shadow-lg rounded-2xl border-2 border-green-100'):
-                ui.label(' TEMPÉRATURE').classes('text-lg font-bold text-green-700 mb-3')
-                ui.label(f'{temp:.1f}°C').classes('text-3xl font-black text-green-600 mb-1')
-                ui.label(f'Seuil: {temp_max}°C').classes('text-sm text-gray-500')
-                status = 'OK' if temp <= temp_max else ' ALERTE'
-                status_color = 'text-green-700' if temp <= temp_max else 'text-red-700'
-                ui.label(status).classes(f'text-base font-semibold {status_color} mt-2')
-            
-            # HUMIDITÉ
-            with ui.card().classes('flex-1 p-6 shadow-lg rounded-2xl border-2 border-blue-100'):
-                ui.label('HUMIDITÉ').classes('text-lg font-bold text-blue-700 mb-3')
-                ui.label(f'{humid:.0f}%').classes('text-3xl font-black text-blue-600 mb-1')
-                ui.label(f'Seuil: {humid_max}%').classes('text-sm text-gray-500')
-                status = 'OK' if humid <= humid_max else 'ALERTE'
-                status_color = 'text-blue-700' if humid <= humid_max else 'text-red-700'
-                ui.label(status).classes(f'text-base font-semibold {status_color} mt-2')
-
-            # MOUVEMENT
-            with ui.card().classes('flex-1 p-6 shadow-lg rounded-2xl border-2 border-orange-100'):
-                ui.label('MOUVEMENT').classes('text-lg font-bold text-orange-700 mb-3')
-                status_mvt = 'ACTIF' if mouvement else 'INACTIF'
-                ui.label(status_mvt).classes('text-3xl font-black text-orange-600 mb-1')
-                ui.label(f'Dernière: {timestamp[:16]}').classes('text-sm text-gray-500')
-                ui.label('Surveillance').classes('text-base font-semibold text-orange-700 mt-2')
-        
-        # ALERTES TABLE CORRIGÉE
-        with ui.card().classes('p-6 shadow-xl rounded-2xl w-full'):
-            ui.label('ALERTES RÉCENTES').classes('text-lg font-bold text-red-700 mb-4')
-            
-            # DEBUG : Affiche nombre alertes
-            ui.label(f'Résultats: {len(alertes)} alertes trouvées').classes('text-sm text-gray-600 mb-2')
+        # TABLE ALERTES
+        with ui.card().classes("p-6 shadow-xl rounded-2xl w-full"):
+            ui.label("ALERTES RÉCENTES").classes("text-lg font-bold text-red-700 mb-4")
+            ui.label(f"{len(alertes)} trouvées").classes("text-sm text-gray-500 mb-2")
             
             if not alertes:
-                ui.label('Aucune alerte récente').classes('text-gray-500 text-center py-8 italic')
+                ui.label("Aucune alerte (testez ESP32 > seuils)").classes(
+                    "text-gray-500 text-center py-6 italic")
             else:
                 ui.table(
                     columns=[
-                        {'name': 'created_at', 'label': 'Date', 'field': 'created_at'},
-                        {'name': 'type_alerte', 'label': 'Capteur', 'field': 'type_alerte'},
-                        {'name': 'message', 'label': 'Message', 'field': 'message'},
+                        {"name": "created_at", "label": "Date", "field": "created_at"},
+                        {"name": "type_alerte", "label": "Type", "field": "type_alerte"},
+                        {"name": "message", "label": "Message", "field": "message"},
                     ],
                     rows=[
                         {
-                            'created_at': dict(alerte)['created_at'][:16] if dict(alerte).get('created_at') else 'N/A',
-                            'type_alerte': dict(alerte).get('type_alerte', 'Inconnu'),
-                            'message': dict(alerte).get('message', 'Pas de message')
+                            "created_at": alerte["created_at"][:16] if alerte.get("created_at") else "N/A",
+                            "type_alerte": alerte.get("type_alerte", "Inconnu"),
+                            "message": alerte.get("message", "")[:50] + "..." if len(alerte.get("message", "")) > 50 else alerte.get("message", "")
                         }
                         for alerte in alertes
                     ]
-                ).classes('w-full').props('dense')
-        ui.button(' Test alerte', color='red').classes('mt-4 text-base py-2 px-6 rounded-xl shadow-md').on('click', lambda: check_and_send_alert(30.5, 80, temp_max, humid_max))
+                ).classes("w-full").props("dense striped")
+
 @ui.page('/dashboard/base')
 def dashboard_base():
     ui.page_title('SUIVI4K - Capteurs')
-    create_dashboard_layout('Valeurs de Base', base_content)
+    create_dashboard_layout('Capteurs Multi-Salles', base_content)
