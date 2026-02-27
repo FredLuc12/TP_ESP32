@@ -1,5 +1,5 @@
 from nicegui import ui, app
-from models import create_tables
+from database import create_tables
 
 create_tables()
 # Assets statiques
