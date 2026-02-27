@@ -32,7 +32,7 @@ Chaque nœud est basé sur un ESP8266 NodeMCU connecté au WiFi "Ansumdine".
   "pir": 1,
   "timestamp": 450938
 }
-
+```
 ##  Superviseur Central (Parcours B - Arduino)
 
 L'Arduino **Uno R4 WiFi** agit comme le **cerveau du système** (`IP: 10.130.13.100`).
